@@ -5,7 +5,6 @@
 ///   LEAVE:<username>\n
 ///   SERVER:<text>\n
 ///   ERROR:<text>\n
-
 #[derive(Debug, Clone)]
 pub enum Message {
     Join(String),
