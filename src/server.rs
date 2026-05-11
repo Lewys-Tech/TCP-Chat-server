@@ -39,6 +39,16 @@ pub fn run(addr: &str) {
         let state = Arc::clone(&state);
 
         thread::spawn(move || {
+            {
+            let mut s = state.lock().unwrap();
+            let id = s.next_id;
+            s.next_id += 1;
+            s.peers.insert(id, Peer {
+                username: format!("anon#{}", id),
+                stream: stream.try_clone().unwrap(),
+            });
+            println!("[server] Peer {} registered", id);
+        }
             let reader = BufReader::new(&stream);
             for line in reader.lines() {
                 let line = line.unwrap();
