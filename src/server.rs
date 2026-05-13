@@ -3,6 +3,7 @@ use std::io::{BufRead, BufReader};
 use std::thread;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
+use std::io::Write;
 
 // one connected client
 
@@ -39,9 +40,10 @@ pub fn run(addr: &str) {
         let state = Arc::clone(&state);
 
         thread::spawn(move || {
+            let id;
             {
             let mut s = state.lock().unwrap();
-            let id = s.next_id;
+            id = s.next_id;
             s.next_id += 1;
             s.peers.insert(id, Peer {
                 username: format!("anon#{}", id),
@@ -52,7 +54,25 @@ pub fn run(addr: &str) {
             let reader = BufReader::new(&stream);
             for line in reader.lines() {
                 let line = line.unwrap();
+
+                if line.starts_with("JOIN:"){
+                    let username = line.strip_prefix("JOIN:").unwrap().to_string();
+                    let mut s = state.lock().unwrap();
+                    if let Some(peer) = s.peers.get_mut(&id){
+                        peer.username = username.clone();
+                    }
+                    println!("[server] Peer {} is now known as {}", id, username);
+                    continue;
+                }
+
+
                 println!("[server] Received: {}", line);
+            let mut s = state.lock().unwrap();
+            for (_, peer) in s.peers.iter_mut() {
+                let msg = format!("{}\n", line);
+                let _ =peer.stream.write_all(msg.as_bytes());
+            }
+
             }
         });
     }
