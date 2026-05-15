@@ -41,6 +41,7 @@ pub fn run(addr: &str) {
 
         thread::spawn(move || {
             let id;
+
             {
             let mut s = state.lock().unwrap();
             id = s.next_id;
@@ -50,6 +51,8 @@ pub fn run(addr: &str) {
                 stream: stream.try_clone().unwrap(),
             });
             println!("[server] Peer {} registered", id);
+
+            
         }
             let reader = BufReader::new(&stream);
             for line in reader.lines() {
