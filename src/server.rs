@@ -66,12 +66,18 @@ pub fn run(addr: &str) {
                 }
 
 
-                println!("[server] Received: {}", line);
-            let mut s = state.lock().unwrap();
-            for (_, peer) in s.peers.iter_mut() {
-                let msg = format!("{}\n", line);
-                let _ =peer.stream.write_all(msg.as_bytes());
-            }
+let username = {
+    let s = state.lock().unwrap();
+    s.peers.get(&id).map(|p| p.username.clone()).unwrap_or_default()
+};
+
+if let Some(crate::message::Message::Say { text, .. }) = crate::message::Message::decode(&line) {
+    let msg = crate::message::Message::Say { from: username, text };
+    let mut s = state.lock().unwrap();
+    for (_, peer) in s.peers.iter_mut() {
+        let _ = peer.stream.write_all(format!("{}\n", msg.encode()).as_bytes());
+    }
+}
 
             }
         });
