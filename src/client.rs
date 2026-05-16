@@ -8,7 +8,7 @@ pub fn run(addr: &str) {
         eprintln!("[client] Cannot connect to {}: {}", addr, e);
         std::process::exit(1);
 
-        
+
     });
     println!("[client] Connected to {}", addr);
 
@@ -20,7 +20,14 @@ pub fn run(addr: &str) {
         let reader = BufReader::new(read_stream);
         for line in reader.lines() {
             let line = line.unwrap();
-            println!("{}", line);
+            match crate::message::Message::decode(&line){
+            Some(Message::Say { from, text })  => println!("<{}> {}", from, text),     // <bob> Hello!
+            Some(Message::Join(name))          => println!("*** {} joined", name),      // *** bob joined
+            Some(Message::Leave(name))         => println!("*** {} left", name),        // *** bob left
+            Some(Message::Server(text))        => println!("[server] {}", text),        // [server] welcome
+            Some(Message::Error(text))         => println!("[error] {}", text),         // [error] bad input
+        }
+            
         }
 
 
