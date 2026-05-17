@@ -17,6 +17,7 @@ pub fn run(addr: &str) {
 
     //spawned thread - reads from server
     thread::spawn(move || {
+        use crate::message::Message;
         let reader = BufReader::new(read_stream);
         for line in reader.lines() {
             let line = line.unwrap();
@@ -26,7 +27,11 @@ pub fn run(addr: &str) {
             Some(Message::Leave(name))         => println!("*** {} left", name),        // *** bob left
             Some(Message::Server(text))        => println!("[server] {}", text),        // [server] welcome
             Some(Message::Error(text))         => println!("[error] {}", text),         // [error] bad input
-        }
+            None                               => println!("{}", line),
+
+            
+            
+        }  
             
         }
 
